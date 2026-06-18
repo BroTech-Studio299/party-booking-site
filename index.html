@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>broTechStudio</title>
+    <title>The Freshers Party</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -147,9 +147,125 @@
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
         ::-webkit-scrollbar-thumb { background: rgba(188, 19, 254, 0.5); border-radius: 10px; }
+
+        /* Toast Notification */
+        #toast-container {
+            position: fixed;
+            bottom: 90px; /* Above mobile nav */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            pointer-events: none;
+        }
+        @media (min-width: 768px) {
+            #toast-container {
+                bottom: 20px;
+            }
+        }
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            border-radius: 9999px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            color: white;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.4s cubic-bezier(0.21, 1.02, 0.73, 1);
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .toast.success {
+            background: linear-gradient(145deg, rgba(22, 163, 74, 0.5) 0%, rgba(22, 163, 74, 0.2) 100%);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 4px 20px rgba(34, 197, 94, 0.3);
+        }
+        .toast.error {
+            background: linear-gradient(145deg, rgba(239, 68, 68, 0.5) 0%, rgba(239, 68, 68, 0.2) 100%);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3);
+        }
+        .toast.info {
+            background: linear-gradient(145deg, rgba(59, 130, 246, 0.5) 0%, rgba(59, 130, 246, 0.2) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Confirmation Modal */
+        #confirmation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        #confirmation-modal.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(15, 5, 29, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .modal-content {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 400px;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        #confirmation-modal.show .modal-content {
+            transform: scale(1);
+        }
     </style>
 </head>
 <body class="text-white">
+
+    <!-- Confirmation Modal -->
+    <div id="confirmation-modal">
+        <div class="modal-backdrop" onclick="hideConfirmation()"></div>
+        <div class="modal-content glass-card rounded-3xl p-8 text-center">
+            <i class="ph-bold ph-question text-4xl text-brand-secondary mx-auto mb-4"></i>
+            <p id="confirmation-message" class="font-syne text-xl font-bold mb-6">Are you sure?</p>
+            <div class="flex gap-4">
+                <button id="confirm-no" onclick="hideConfirmation()" class="w-full py-3 rounded-xl font-space font-bold bg-white/10 hover:bg-white/20 transition border border-white/30">No, cancel</button>
+                <button id="confirm-yes" class="w-full py-3 rounded-xl font-space font-bold btn-primary">Yes, continue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
 
     <!-- Ambient Lighting (Lighter and more vibrant) -->
     <div class="ambient-glow bg-[#BC13FE] w-[50vw] h-[50vw] top-[-10%] left-[-10%] opacity-30"></div>
@@ -158,7 +274,7 @@
     <!-- Mobile Header -->
     <header class="md:hidden fixed top-0 left-0 right-0 z-50 p-5 glass-header text-center">
         <h1 class="font-syne text-xl font-bold tracking-tighter">
-            broTech<span class="text-brand-primary">Studio</span>
+            The Freshers <span class="text-brand-primary">Party</span>
         </h1>
     </header>
 
@@ -166,12 +282,11 @@
     <header class="hidden md:block fixed top-0 left-0 right-0 z-50 px-6 py-4">
         <div class="max-w-7xl mx-auto glass-panel rounded-full px-8 py-4 flex items-center justify-between">
             <div class="font-syne text-2xl font-bold tracking-tighter">
-                broTech<span class="text-brand-primary">Studio</span>
+                The Freshers <span class="text-brand-primary">Party</span>
             </div>
             <nav class="flex items-center gap-8 font-space font-medium text-sm">
                 <button onclick="navigateTo('home')" class="nav-btn text-brand-primary drop-shadow-[0_0_8px_#BC13FE]" data-target="home">Home</button>
                 <button onclick="navigateTo('book')" class="nav-btn text-gray-300 hover:text-white transition" data-target="book">Book</button>
-                <button onclick="navigateTo('status')" class="nav-btn text-gray-300 hover:text-white transition" data-target="status">Status</button>
                 <button onclick="navigateTo('support')" class="nav-btn text-gray-300 hover:text-white transition" data-target="support">Support</button>
             </nav>
             <button onclick="navigateTo('book')" class="btn-primary px-6 py-2 rounded-full font-space font-bold text-sm">
@@ -189,31 +304,35 @@
             <div class="relative min-h-[85vh] flex flex-col justify-center items-center px-6 text-center">
                 <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel border-brand-primary/40 mb-8 animate-float">
                     <i class="ph-fill ph-lightning text-brand-tertiary"></i>
-                    <span class="font-space text-sm font-medium tracking-wider uppercase text-brand-primary">The Biggest Tech Event of 2026</span>
+                    <span class="font-space text-sm font-medium tracking-wider uppercase text-brand-primary">The Sleepless night</span>
                 </div>
                 
                 <h1 class="font-syne text-5xl md:text-8xl font-bold tracking-tight leading-none mb-6 drop-shadow-xl">
-                    broTech <br />
-                    <span class="text-gradient">Studio</span>
+                    The Glitchless <br />
+                    <span class="text-gradient">Nights</span>
                 </h1>
                 
                 <p class="text-lg md:text-xl text-gray-200 max-w-2xl font-sans mb-10">
-                    Step into a neon-soaked reality. The ultimate luxury nightlife experience curated exclusively for college students.
+                    Step into the music Floor. The ultimate dj night experience curated exclusively for you.
                 </p>
                 
                 <!-- Countdown -->
-                <div class="flex flex-wrap justify-center gap-4 mb-12">
-                    <div class="glass-card px-6 py-4 rounded-2xl flex flex-col items-center min-w-[100px]">
-                        <span class="font-syne text-3xl font-bold">12</span>
+                <div id="countdown" class="flex flex-wrap justify-center gap-4 mb-12">
+                    <div class="glass-card px-6 py-4 rounded-2xl flex flex-col items-center min-w-[80px] md:min-w-[100px]">
+                        <span id="days" class="font-syne text-3xl font-bold">00</span>
                         <span class="text-xs font-space text-gray-300 uppercase tracking-widest mt-1">Days</span>
                     </div>
-                    <div class="glass-card px-6 py-4 rounded-2xl flex flex-col items-center min-w-[100px]">
-                        <span class="font-syne text-3xl font-bold">08</span>
+                    <div class="glass-card px-6 py-4 rounded-2xl flex flex-col items-center min-w-[80px] md:min-w-[100px]">
+                        <span id="hours" class="font-syne text-3xl font-bold">00</span>
                         <span class="text-xs font-space text-gray-300 uppercase tracking-widest mt-1">Hours</span>
                     </div>
-                    <div class="glass-card px-6 py-4 rounded-2xl flex flex-col items-center min-w-[100px]">
-                        <span class="font-syne text-3xl font-bold text-brand-secondary">45</span>
+                    <div class="glass-card px-6 py-4 rounded-2xl flex flex-col items-center min-w-[80px] md:min-w-[100px]">
+                        <span id="minutes" class="font-syne text-3xl font-bold text-brand-secondary">00</span>
                         <span class="text-xs font-space text-gray-300 uppercase tracking-widest mt-1">Mins</span>
+                    </div>
+                    <div class="glass-card px-6 py-4 rounded-2xl flex flex-col items-center min-w-[80px] md:min-w-[100px]">
+                        <span id="seconds" class="font-syne text-3xl font-bold">00</span>
+                        <span class="text-xs font-space text-gray-300 uppercase tracking-widest mt-1">Secs</span>
                     </div>
                 </div>
 
@@ -230,22 +349,22 @@
                         <div class="w-14 h-14 rounded-2xl bg-brand-primary/20 flex items-center justify-center text-brand-primary text-3xl mb-6 group-hover:bg-brand-primary group-hover:text-white transition-all">
                             <i class="ph-fill ph-music-notes"></i>
                         </div>
-                        <h3 class="font-syne text-2xl font-semibold mb-3">Top DJs</h3>
-                        <p class="text-gray-200 font-sans leading-relaxed">Experience sets from top-tier artists pushing EDM & Techno all night.</p>
+                        <h3 class="font-syne text-2xl font-semibold mb-3">Mystery DJ</h3>
+                        <p class="text-gray-200 font-sans leading-relaxed">An unrevealed DJ artist will be spinning the decks all night.</p>
                     </div>
                     <div class="glass-card p-8 rounded-3xl group">
                         <div class="w-14 h-14 rounded-2xl bg-[#00D2FF]/20 flex items-center justify-center text-[#00D2FF] text-3xl mb-6 group-hover:bg-[#00D2FF] group-hover:text-white transition-all">
-                            <i class="ph-fill ph-lightning"></i>
+                            <i class="ph-fill ph-bowl-food"></i>
                         </div>
-                        <h3 class="font-syne text-2xl font-semibold mb-3">Neon Floor</h3>
-                        <p class="text-gray-200 font-sans leading-relaxed">Immersive reactive lighting that pulses perfectly with every beat.</p>
+                        <h3 class="font-syne text-2xl font-semibold mb-3">Food</h3>
+                        <p class="text-gray-200 font-sans leading-relaxed">Enjoy delicious food and beverage throughout the event.</p>
                     </div>
                     <div class="glass-card p-8 rounded-3xl group">
                         <div class="w-14 h-14 rounded-2xl bg-[#FF00BD]/20 flex items-center justify-center text-[#FF00BD] text-3xl mb-6 group-hover:bg-[#FF00BD] group-hover:text-white transition-all">
-                            <i class="ph-fill ph-camera"></i>
+                            <i class="ph-fill ph-swimming-pool"></i>
                         </div>
-                        <h3 class="font-syne text-2xl font-semibold mb-3">Cyber Booths</h3>
-                        <p class="text-gray-200 font-sans leading-relaxed">Capture the memories in aesthetic neon-lit zones built for your feed.</p>
+                        <h3 class="font-syne text-2xl font-semibold mb-3">Pool Access</h3>
+                        <p class="text-gray-200 font-sans leading-relaxed">Take a dip and cool off in the stunning pool area of the venue.</p>
                     </div>
                 </div>
             </div>
@@ -255,7 +374,7 @@
         <section id="book" class="page-section px-6 max-w-6xl mx-auto animate-slide-up">
             <div class="text-center mb-10 pt-4">
                 <h1 class="font-syne text-4xl md:text-5xl font-bold mb-4">Secure Your <span class="text-gradient">Spot</span></h1>
-                <p class="text-gray-200 font-sans text-lg">Complete payment and upload your screenshot.</p>
+                <p class="text-gray-200 font-sans text-lg">Complete your payment and fill the form to get your ticket via email.</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
@@ -264,24 +383,24 @@
                     <!-- Pass Info -->
                     <div class="glass-card p-6 rounded-3xl relative overflow-hidden">
                         <i class="ph-fill ph-ticket text-white/10 text-9xl absolute -top-4 -right-4"></i>
-                        <div class="inline-block px-3 py-1 rounded-full bg-brand-primary/20 text-brand-primary font-space text-xs font-bold uppercase tracking-wider mb-4 border border-brand-primary/30">
-                            Phase 1 Release
+                        <div class="text-brand-secondary px-3 py-1 rounded-full text-brand-primary font-space text-xs font-bold uppercase tracking-wider mb-4 border border-brand-primary/30">
+                            The Glitchless Nights
                         </div>
                         <h2 class="font-syne text-2xl font-bold mb-2">Early Bird Pass</h2>
-                        <div class="text-4xl font-syne font-bold mb-6">₹999 <span class="text-base text-gray-300 font-sans font-normal">/ person</span></div>
+                        <div class="text-4xl font-syne font-bold mb-6">₹700 <span class="text-base text-gray-300 font-sans font-normal">/ person</span></div>
                         
                         <div class="space-y-4 font-sans text-sm text-gray-200">
                             <div class="flex justify-between border-b border-white/20 pb-2">
                                 <span class="text-gray-300">Date</span>
-                                <span class="font-medium">Nov 15, 2026</span>
+                                <span class="font-medium">July 11, 2026, Saturday</span>
                             </div>
                             <div class="flex justify-between border-b border-white/20 pb-2">
                                 <span class="text-gray-300">Time</span>
-                                <span class="font-medium">8:00 PM Onwards</span>
+                                <span class="font-medium">7:00 PM Onwards</span>
                             </div>
                             <div class="flex justify-between pb-2">
                                 <span class="text-gray-300">Venue</span>
-                                <span class="font-medium text-right">The Neon Warehouse</span>
+                                <span class="font-medium text-right">EEFA Hotel</span>
                             </div>
                         </div>
                     </div>
@@ -290,12 +409,8 @@
                     <div class="glass-card p-6 rounded-3xl text-center">
                         <p class="font-space font-medium text-gray-200 mb-6 uppercase tracking-widest text-sm">Scan to Pay</p>
                         <div class="bg-white p-4 rounded-2xl inline-block mb-6 shadow-xl relative">
-                            <!-- Placeholder QR Box -->
-                            <div class="w-48 h-48 border-4 border-black rounded-xl flex items-center justify-center bg-white relative">
-                                <div class="absolute inset-2 border-[16px] border-dashed border-black opacity-80"></div>
-                                <div class="absolute inset-8 border-[16px] border-dotted border-black opacity-60"></div>
-                                <i class="ph-fill ph-qr-code absolute w-10 h-10 bg-brand-primary text-white rounded-lg p-1 text-4xl flex items-center justify-center shadow-lg"></i>
-                            </div>
+                            <!-- Placeholder for user's QR code image -->
+                            <img src="placeholder-qr.png" alt="Scan to pay" class="w-48 h-48 rounded-xl bg-gray-200">
                         </div>
                         
                         <div class="flex items-center justify-between glass-panel px-4 py-3 rounded-xl border border-white/20">
@@ -303,7 +418,7 @@
                                 <div class="text-xs text-gray-300 font-space mb-1">UPI ID</div>
                                 <div class="font-sans text-sm font-bold tracking-wide">brotechstudio@upi</div>
                             </div>
-                            <button onclick="alert('UPI ID Copied!')" class="text-brand-secondary hover:text-white transition p-2 bg-brand-secondary/20 rounded-lg">
+                            <button onclick="copyToClipboard('brotechstudio@upi')" class="text-brand-secondary hover:text-white transition p-2 bg-brand-secondary/20 rounded-lg">
                                 <i class="ph-bold ph-copy text-xl"></i>
                             </button>
                         </div>
@@ -311,204 +426,34 @@
                 </div>
 
                 <!-- Right Column: Form -->
-                <div class="md:col-span-7 space-y-6">
-                    <div class="glass-card p-6 md:p-8 rounded-3xl">
+                <div class="md:col-span-7 space-y-6 flex flex-col">
+                    <div class="glass-card p-6 md:p-8 rounded-3xl flex-grow flex flex-col">
                         
-                        <!-- Step 1: Upload -->
                         <h3 class="font-syne text-xl font-bold mb-6 flex items-center gap-3">
                             <span class="flex items-center justify-center w-8 h-8 rounded-full bg-brand-primary text-white text-sm">1</span> 
-                            Payment Proof
+                            Submit Payment Proof
                         </h3>
+
+                        <p class="font-sans text-gray-300 mb-4">After scanning the QR and completing the payment, click the button below. You will be redirected to a form to upload your payment screenshot.</p>
                         
-                        <div id="upload-box" onclick="simulateUpload()" class="border-2 border-dashed border-white/40 rounded-2xl p-8 text-center transition-all duration-300 hover:border-brand-primary hover:bg-white/5 cursor-pointer">
-                            <div id="upload-state-initial" class="flex flex-col items-center justify-center h-32">
-                                <div class="w-16 h-16 rounded-full glass-panel flex items-center justify-center mb-4">
-                                    <i class="ph-bold ph-upload-simple text-3xl text-brand-primary"></i>
-                                </div>
-                                <p class="font-sans font-medium text-white mb-1">Tap to Upload Screenshot</p>
-                                <p class="text-xs text-gray-300 font-sans">JPEG, PNG or PDF (Max 5MB)</p>
-                            </div>
-                            
-                            <div id="upload-state-loading" class="hidden flex flex-col items-center justify-center h-32">
-                                <div class="w-10 h-10 border-4 border-white/30 border-t-brand-primary rounded-full animate-spin mb-4"></div>
-                                <p class="font-space text-gray-200">Uploading...</p>
-                            </div>
+                        <div class="flex-grow"></div>
 
-                            <div id="upload-state-success" class="hidden flex flex-col items-center justify-center h-32">
-                                <div class="w-14 h-14 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center mb-4 border border-green-500/40">
-                                    <i class="ph-bold ph-check text-3xl"></i>
-                                </div>
-                                <p class="font-sans font-medium text-white">Screenshot Uploaded</p>
-                                <button onclick="event.stopPropagation(); resetUpload();" class="text-xs text-brand-secondary mt-2 underline">Replace</button>
-                            </div>
-                        </div>
+                        <button onclick="askForConfirmation('https://docs.google.com/forms/d/e/YOUR_FORM_ID/viewform', 'You will be redirected to Google Forms. Continue?')" class="w-full py-4 mt-4 rounded-xl font-space font-bold text-lg transition-all bg-green-500/20 text-green-300 hover:bg-green-500/30 border border-green-500/40 flex items-center justify-center gap-3">
+                            Go to Upload Form <i class="ph-bold ph-arrow-right"></i>
+                        </button>
 
-                        <!-- Step 2: Details -->
-                        <h3 class="font-syne text-xl font-bold mt-10 mb-6 flex items-center gap-3">
-                            <span class="flex items-center justify-center w-8 h-8 rounded-full bg-brand-secondary text-white text-sm">2</span> 
-                            Transaction Details
-                        </h3>
-
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block font-space text-sm text-gray-200 mb-2">Transaction ID / UTR Number</label>
-                                <input type="text" id="utr-input" placeholder="e.g. 123456789012" oninput="checkFormValidity()"
-                                    class="w-full bg-black/30 border border-white/20 rounded-xl px-5 py-4 text-white placeholder:text-gray-400 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition font-sans text-lg"
-                                />
-                            </div>
-                        </div>
-
-                        <!-- Desktop Submit Button -->
-                        <div class="hidden md:block mt-10">
-                            <button id="submit-btn-desktop" disabled onclick="submitBooking()" class="w-full py-5 rounded-2xl font-space font-bold text-lg transition-all bg-white/10 text-gray-500 cursor-not-allowed">
-                                Submit Booking
-                            </button>
-                        </div>
+                    </div>
+                     <div class="glass-panel p-6 rounded-3xl text-center border border-white/20">
+                        <i class="ph-bold ph-info text-3xl text-brand-secondary mx-auto mb-3"></i>
+                        <p class="text-gray-200 font-sans leading-relaxed">After form submission, our team will verify your payment and your official ticket will be sent to the email address you provide in the form.</p>
                     </div>
                 </div>
             </div>
-
-            <!-- Mobile Sticky Submit Button -->
-            <div class="md:hidden fixed bottom-[76px] left-0 right-0 p-4 bg-gradient-to-t from-[#150824] via-[#150824]/95 to-transparent z-40">
-                <button id="submit-btn-mobile" disabled onclick="submitBooking()" class="w-full py-4 rounded-2xl font-space font-bold text-lg transition-all shadow-2xl bg-white/10 text-gray-400 border border-white/20">
-                    Submit Booking
-                </button>
-            </div>
         </section>
 
-        <!-- ================= SUCCESS PAGE ================= -->
+        <!-- ================= SUCCESS PAGE (No longer used, kept for reference) ================= -->
         <section id="success" class="page-section hidden min-h-[70vh] flex items-center justify-center px-6">
-            <div class="glass-card rounded-[40px] p-8 md:p-12 text-center max-w-lg w-full relative overflow-hidden shadow-[0_0_50px_rgba(0,210,255,0.2)]">
-                <!-- Glowing orb behind -->
-                <div class="absolute top-[-50px] left-1/2 -translate-x-1/2 w-[150px] h-[150px] bg-brand-secondary rounded-full blur-[80px] opacity-40 pointer-events-none"></div>
-
-                <div class="w-24 h-24 mx-auto bg-gradient-to-br from-brand-secondary to-blue-600 rounded-full flex items-center justify-center mb-8 shadow-[0_0_30px_rgba(0,210,255,0.6)]">
-                    <i class="ph-bold ph-check text-5xl text-white"></i>
-                </div>
-                
-                <h1 class="font-syne text-3xl md:text-4xl font-bold mb-4">Booking <span class="text-brand-secondary">Submitted!</span></h1>
-                <p class="text-gray-200 font-sans mb-8 leading-relaxed">
-                    Your payment screenshot has been securely uploaded. Our team will verify it and issue your pass shortly.
-                </p>
-
-                <div class="glass-panel rounded-2xl p-6 mb-8 border border-white/20 bg-black/40">
-                    <p class="text-sm font-space text-gray-300 mb-1 uppercase tracking-widest">Reference No.</p>
-                    <p class="font-syne text-2xl font-bold text-brand-primary tracking-wide">#BTS-X98B2</p>
-                </div>
-
-                <div class="space-y-4">
-                    <button onclick="navigateTo('status')" class="w-full py-4 rounded-xl font-space font-bold bg-white/10 hover:bg-white/20 transition border border-white/30">
-                        Check Status
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- ================= STATUS PAGE ================= -->
-        <section id="status" class="page-section px-6 max-w-lg mx-auto animate-slide-up">
-            <div class="text-center mb-8 pt-4">
-                <h1 class="font-syne text-4xl font-bold mb-3">Ticket <span class="text-brand-tertiary">Status</span></h1>
-            </div>
-
-            <!-- Demo Status Toggles -->
-            <div class="flex justify-center gap-2 mb-10 p-1 glass-panel rounded-full mx-auto w-fit">
-                <button onclick="setStatusView('pending')" id="toggle-pending" class="px-4 py-2 rounded-full text-xs font-space uppercase tracking-wider transition bg-white/20 font-bold">Pending</button>
-                <button onclick="setStatusView('approved')" id="toggle-approved" class="px-4 py-2 rounded-full text-xs font-space uppercase tracking-wider transition text-gray-300 hover:text-white">Approved</button>
-                <button onclick="setStatusView('rejected')" id="toggle-rejected" class="px-4 py-2 rounded-full text-xs font-space uppercase tracking-wider transition text-gray-300 hover:text-white">Rejected</button>
-            </div>
-
-            <!-- Pending View -->
-            <div id="status-pending" class="glass-card p-10 rounded-[32px] text-center border-t-brand-secondary/70 relative overflow-hidden block">
-                <div class="w-20 h-20 mx-auto rounded-full border-4 border-brand-secondary/30 border-t-brand-secondary animate-spin mb-6"></div>
-                <h2 class="font-syne text-2xl font-bold mb-3">Verification Pending</h2>
-                <p class="text-gray-200 font-sans text-sm leading-relaxed mb-6">
-                    We are currently reviewing your payment. This usually takes 2-4 hours. Check back later!
-                </p>
-                <div class="inline-block px-4 py-2 bg-black/40 rounded-lg border border-white/20">
-                    <span class="text-xs font-space text-gray-300 block mb-1">Ref ID</span>
-                    <span class="font-mono text-sm tracking-wider">#BTS-X98B2</span>
-                </div>
-            </div>
-
-            <!-- Approved View -->
-            <div id="status-approved" class="relative group hidden">
-                <div class="absolute -inset-1 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-[32px] blur opacity-40"></div>
-                <div class="ticket-cutout bg-[#1A0B2E] border border-white/30 rounded-[32px] relative overflow-hidden flex flex-col shadow-2xl">
-                    <!-- Top Half -->
-                    <div class="p-8 pb-10 bg-gradient-to-b from-[#2A1448] to-[#1A0B2E] relative border-b border-dashed border-white/40">
-                        <div class="absolute top-0 right-0 p-4">
-                            <span class="px-3 py-1 bg-brand-secondary/20 text-brand-secondary font-space text-xs font-bold rounded-full border border-brand-secondary/40">APPROVED</span>
-                        </div>
-                        <h4 class="font-space text-brand-primary text-sm uppercase tracking-widest mb-1 font-bold">Admit One</h4>
-                        <h2 class="font-syne text-3xl font-bold text-white mb-6">broTechStudio</h2>
-                        
-                        <div class="space-y-4 font-sans">
-                            <div class="flex items-center gap-4">
-                                <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                                    <i class="ph-bold ph-user text-lg text-gray-200"></i>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-gray-300 font-space uppercase">Name</p>
-                                    <p class="font-medium">Alex Walker</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-4">
-                                <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                                    <i class="ph-bold ph-clock text-lg text-gray-200"></i>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-gray-300 font-space uppercase">Date & Time</p>
-                                    <p class="font-medium">Nov 15 • 8:00 PM</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-4">
-                                <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                                    <i class="ph-bold ph-ticket text-lg text-gray-200"></i>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-gray-300 font-space uppercase">Type</p>
-                                    <p class="font-medium">Phase 1 Early Bird</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Bottom Half -->
-                    <div class="p-8 pt-10 bg-[#0F051D] flex flex-col items-center">
-                        <p class="text-xs text-gray-300 font-space mb-4 uppercase tracking-widest">Entry Barcode</p>
-                        <div class="w-full h-20 bg-white rounded-lg mb-4 flex justify-between items-center px-4">
-                            <!-- Simulated barcode using pure CSS divs -->
-                            <div class="h-12 w-1 bg-black"></div>
-                            <div class="h-12 w-2 bg-black"></div>
-                            <div class="h-12 w-1 bg-black"></div>
-                            <div class="h-12 w-3 bg-black"></div>
-                            <div class="h-12 w-1 bg-black"></div>
-                            <div class="h-12 w-2 bg-black"></div>
-                            <div class="h-12 w-1 bg-black"></div>
-                            <div class="h-12 w-2 bg-black"></div>
-                            <div class="h-12 w-3 bg-black"></div>
-                            <div class="h-12 w-1 bg-black"></div>
-                            <div class="h-12 w-2 bg-black"></div>
-                            <div class="h-12 w-1 bg-black"></div>
-                        </div>
-                        <p class="font-mono text-gray-300 tracking-widest font-bold">BTS-9823-A441</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Rejected View -->
-            <div id="status-rejected" class="glass-card p-10 rounded-[32px] text-center border-t-brand-tertiary/70 relative hidden">
-                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[100px] h-[100px] bg-brand-tertiary rounded-full blur-[60px] opacity-30 pointer-events-none"></div>
-                <div class="w-20 h-20 mx-auto rounded-full bg-brand-tertiary/10 border border-brand-tertiary/40 flex items-center justify-center mb-6">
-                    <i class="ph-bold ph-warning-circle text-4xl text-brand-tertiary"></i>
-                </div>
-                <h2 class="font-syne text-2xl font-bold mb-3">Verification Failed</h2>
-                <p class="text-gray-200 font-sans text-sm leading-relaxed mb-8">
-                    We couldn't verify your payment. The screenshot might be unclear or the UTR number doesn't match.
-                </p>
-                <button class="w-full py-4 rounded-xl font-space font-bold bg-brand-tertiary/20 hover:bg-brand-tertiary/40 border border-brand-tertiary/40 transition">
-                    Re-upload Details
-                </button>
-            </div>
+            
         </section>
 
         <!-- ================= SUPPORT PAGE ================= -->
@@ -519,37 +464,25 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- WhatsApp -->
-                <a href="#" class="glass-card p-8 rounded-3xl flex items-center gap-6 group hover:border-[#25D366]/50 transition-all">
-                    <div class="w-16 h-16 rounded-full bg-[#25D366]/20 flex items-center justify-center text-[#25D366] group-hover:scale-110 transition-transform border border-[#25D366]/30 group-hover:bg-[#25D366] group-hover:text-white">
-                        <i class="ph-fill ph-whatsapp-logo text-3xl"></i>
-                    </div>
-                    <div>
-                        <p class="text-sm font-space text-gray-300 uppercase tracking-widest mb-1">WhatsApp</p>
-                        <p class="font-syne text-xl font-bold">+91 98765 43210</p>
-                    </div>
-                </a>
-
                 <!-- Email -->
-                <a href="#" class="glass-card p-8 rounded-3xl flex items-center gap-6 group hover:border-brand-secondary/50 transition-all">
-                    <div class="w-16 h-16 rounded-full bg-brand-secondary/20 flex items-center justify-center text-brand-secondary group-hover:scale-110 transition-transform border border-brand-secondary/30 group-hover:bg-brand-secondary group-hover:text-white">
+                <a href="javascript:void(0)" onclick="askForConfirmation('mailto:brotechstudio299@gmail.com', 'You will be redirected to email. Continue?')" class="glass-card p-8 rounded-3xl flex items-center gap-6 group hover:border-brand-secondary/50 transition-all">
+                    <div class="w-16 h-16 rounded-full bg-brand-secondary/20 flex items-center justify-center text-brand-secondary group-hover:scale-110 transition-transform border border-brand-secondary/30 group-hover:bg-brand-secondary group-hover:text-white flex-shrink-0">
                         <i class="ph-fill ph-envelope-simple text-3xl"></i>
                     </div>
-                    <div>
+                    <div class="overflow-hidden">
                         <p class="text-sm font-space text-gray-300 uppercase tracking-widest mb-1">Email</p>
-                        <p class="font-syne text-xl font-bold">crew@brotechstudio.com</p>
+                        <p class="font-syne text-xl font-bold break-words">brotechstudio299@gmail.com</p>
                     </div>
                 </a>
 
                 <!-- Instagram -->
-                <a href="#" class="glass-card p-8 rounded-3xl flex items-center gap-6 group md:col-span-2 transition-all">
-                    <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-[#f09433] via-[#e6683c] to-[#bc1888] flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(188,24,136,0.5)]">
+                <a href="javascript:void(0)" onclick="askForConfirmation('https://www.instagram.com/fresherss_2026/', 'You will be redirected to Instagram. Continue?')" class="glass-card p-8 rounded-3xl flex items-center gap-6 group transition-all">
+                    <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-[#f09433] via-[#e6683c] to-[#bc1888] flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(188,24,136,0.5)] flex-shrink-0">
                         <i class="ph-fill ph-instagram-logo text-3xl"></i>
                     </div>
-                    <div>
+                    <div class="overflow-hidden">
                         <p class="text-sm font-space text-gray-300 uppercase tracking-widest mb-1">Instagram</p>
-                        <p class="font-syne text-xl font-bold">@broTechStudio</p>
-                        <p class="text-sm text-gray-400 mt-1">DM us for quick queries!</p>
+                        <p class="font-syne text-xl font-bold break-words">@TheFreshersParty</p>
                     </div>
                 </a>
             </div>
@@ -557,14 +490,14 @@
             <div class="mt-12 glass-panel p-8 rounded-3xl border border-white/20 text-center bg-black/30">
                 <i class="ph-bold ph-shield-check text-4xl text-gray-300 mx-auto mb-4 block"></i>
                 <h3 class="font-syne text-lg font-bold mb-2">Safe & Secure</h3>
-                <p class="text-sm text-gray-300 font-sans">This is an official university-approved event. All payments are tracked and secure.</p>
+                <p class="text-sm text-gray-300 font-sans">All payments are tracked and secure.</p>
             </div>
         </section>
 
     </main>
 
     <!-- Mobile Bottom Navigation (Crucial for Mobile-First) -->
-    <nav class="md:hidden fixed bottom-6 left-4 right-4 z-50 glass-header rounded-2xl border border-white/20 px-2 py-3 flex justify-around items-center shadow-[0_10px_40px_rgba(0,0,0,0.8)] pb-safe">
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-header rounded-t-2xl border-t border-white/20 px-2 py-3 flex justify-around items-center shadow-[0_-10px_40px_rgba(0,0,0,0.5)] pb-safe">
         <button onclick="navigateTo('home')" class="nav-btn-mobile flex flex-col items-center justify-center w-16 gap-1 relative transition-all duration-300 text-brand-primary" data-target="home">
             <i class="ph-fill ph-house text-2xl nav-icon transition-transform -translate-y-1"></i>
             <span class="text-[10px] font-space font-bold absolute bottom-0 opacity-100 transition-opacity">Home</span>
@@ -577,12 +510,6 @@
             <div class="nav-glow absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-brand-primary/30 rounded-full blur-md -z-10 hidden"></div>
         </button>
         
-        <button onclick="navigateTo('status')" class="nav-btn-mobile flex flex-col items-center justify-center w-16 gap-1 relative transition-all duration-300 text-gray-400" data-target="status">
-            <i class="ph-fill ph-check-circle text-2xl nav-icon transition-transform"></i>
-            <span class="text-[10px] font-space font-bold absolute bottom-0 opacity-0 transition-opacity">Status</span>
-            <div class="nav-glow absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-brand-primary/30 rounded-full blur-md -z-10 hidden"></div>
-        </button>
-        
         <button onclick="navigateTo('support')" class="nav-btn-mobile flex flex-col items-center justify-center w-16 gap-1 relative transition-all duration-300 text-gray-400" data-target="support">
             <i class="ph-fill ph-chat-circle-dots text-2xl nav-icon transition-transform"></i>
             <span class="text-[10px] font-space font-bold absolute bottom-0 opacity-0 transition-opacity">Support</span>
@@ -590,13 +517,40 @@
         </button>
     </nav>
 
-    <!-- Desktop Footer -->
-    <footer class="hidden md:block py-10 text-center text-gray-400 font-space text-sm relative z-10 glass-header border-t-0 mt-20">
-        <p>© 2026 broTechStudio. Built by broTechStudio</p>
+    <!-- Footer for both Mobile and Desktop -->
+    <footer class="py-6 text-center text-gray-400 font-space text-sm relative z-10 bg-brand-base/50 mt-12 md:mt-20 mb-20 md:mb-0">
+        <p>© 2026 The Freshers Party.<br> Built by <a href="https://brotechstudio.qzz.io/" target="_blank" rel="noopener noreferrer" class="text-brand-secondary hover:text-white underline underline-offset-4 transition-colors">broTech Studio</a></p>
     </footer>
 
     <!-- Vanilla JavaScript Logic -->
     <script>
+        // === Countdown Timer ===
+        function startCountdown() {
+            const countdownDate = new Date("July 11, 2026 19:00:00").getTime();
+
+            const countdownFunction = setInterval(function() {
+                const now = new Date().getTime();
+                const distance = countdownDate - now;
+
+                if (distance < 0) {
+                    clearInterval(countdownFunction);
+                    document.getElementById("countdown").innerHTML = "<div class='text-2xl font-bold text-brand-primary'>The event is live!</div>";
+                    return;
+                }
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                document.getElementById("days").innerText = days.toString().padStart(2, '0');
+                document.getElementById("hours").innerText = hours.toString().padStart(2, '0');
+                document.getElementById("minutes").innerText = minutes.toString().padStart(2, '0');
+                document.getElementById("seconds").innerText = seconds.toString().padStart(2, '0');
+
+            }, 1000);
+        }
+
         // === Navigation Logic ===
         function navigateTo(pageId) {
             // Hide all pages
@@ -655,103 +609,90 @@
         }
 
         // === Booking Flow Logic ===
-        let isUploaded = false;
-
-        function simulateUpload() {
-            if(isUploaded) return; // Don't trigger if already uploaded
-            
-            const initial = document.getElementById('upload-state-initial');
-            const loading = document.getElementById('upload-state-loading');
-            const success = document.getElementById('upload-state-success');
-            const box = document.getElementById('upload-box');
-
-            // Show loading
-            initial.classList.add('hidden');
-            loading.classList.remove('hidden');
-            loading.classList.add('flex');
-
-            // Fake API Delay
-            setTimeout(() => {
-                loading.classList.remove('flex');
-                loading.classList.add('hidden');
-                
-                success.classList.remove('hidden');
-                success.classList.add('flex');
-                
-                box.classList.add('border-brand-secondary', 'bg-brand-secondary/10');
-                box.classList.remove('border-white/40', 'hover:border-brand-primary');
-                
-                isUploaded = true;
-                checkFormValidity();
-            }, 1500);
+        function redirectToGoogleForm() {
+            // This function is now legacy, confirmation flow is handled by askForConfirmation
         }
 
-        function resetUpload() {
-            isUploaded = false;
-            
-            document.getElementById('upload-state-success').classList.add('hidden');
-            document.getElementById('upload-state-success').classList.remove('flex');
-            
-            document.getElementById('upload-state-initial').classList.remove('hidden');
-            document.getElementById('upload-state-initial').classList.add('flex');
-            
-            const box = document.getElementById('upload-box');
-            box.classList.remove('border-brand-secondary', 'bg-brand-secondary/10');
-            box.classList.add('border-white/40', 'hover:border-brand-primary');
-            
-            checkFormValidity();
-        }
-
-        function checkFormValidity() {
-            const utr = document.getElementById('utr-input').value.trim();
-            const btnDesktop = document.getElementById('submit-btn-desktop');
-            const btnMobile = document.getElementById('submit-btn-mobile');
-            
-            const isValid = utr.length > 0 && isUploaded;
-
-            [btnDesktop, btnMobile].forEach(btn => {
-                if(isValid) {
-                    btn.disabled = false;
-                    btn.classList.remove('bg-white/10', 'text-gray-500', 'text-gray-400', 'border-white/20', 'cursor-not-allowed');
-                    btn.classList.add('btn-primary', 'text-white');
-                } else {
-                    btn.disabled = true;
-                    btn.classList.add('bg-white/10', 'text-gray-500', 'cursor-not-allowed');
-                    if(btn.id === 'submit-btn-mobile') btn.classList.add('border-white/20');
-                    btn.classList.remove('btn-primary', 'text-white');
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('UPI ID copied!', 'success');
+            }, (err) => {
+                // Fallback for older browsers
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('UPI ID copied!', 'success');
+                } catch (err) {
+                    showToast('Failed to copy.', 'error');
                 }
+                document.body.removeChild(textArea);
             });
         }
 
-        function submitBooking() {
-            navigateTo('success');
-            // Reset form for demo purposes
-            document.getElementById('utr-input').value = '';
-            resetUpload();
-        }
+        // === Confirmation Modal Logic ===
+        let confirmationCallback = null;
 
-        // === Status View Logic ===
-        function setStatusView(statusType) {
-            // Hide all status views
-            ['pending', 'approved', 'rejected'].forEach(type => {
-                document.getElementById(`status-${type}`).classList.add('hidden');
-                document.getElementById(`status-${type}`).classList.remove('block');
-                
-                // Reset toggle buttons
-                const btn = document.getElementById(`toggle-${type}`);
-                btn.classList.remove('bg-white/20', 'font-bold', 'text-white');
-                btn.classList.add('text-gray-300');
-            });
-
-            // Show active status view
-            document.getElementById(`status-${statusType}`).classList.remove('hidden');
-            document.getElementById(`status-${statusType}`).classList.add('block');
+        function askForConfirmation(url, message) {
+            const modal = document.getElementById('confirmation-modal');
+            document.getElementById('confirmation-message').innerText = message;
             
-            // Activate toggle button
-            const activeBtn = document.getElementById(`toggle-${statusType}`);
-            activeBtn.classList.add('bg-white/20', 'font-bold', 'text-white');
-            activeBtn.classList.remove('text-gray-300');
+            confirmationCallback = () => {
+                window.open(url, '_blank');
+                hideConfirmation();
+            };
+
+            document.getElementById('confirm-yes').onclick = confirmationCallback;
+            modal.classList.add('show');
         }
+
+        function hideConfirmation() {
+            const modal = document.getElementById('confirmation-modal');
+            modal.classList.remove('show');
+            confirmationCallback = null;
+        }
+
+        // === Toast Notification Logic ===
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            let iconClass = '';
+            if (type === 'success') iconClass = 'ph-bold ph-check-circle';
+            else if (type === 'error') iconClass = 'ph-bold ph-x-circle';
+            else iconClass = 'ph-bold ph-info';
+
+            toast.innerHTML = `
+                <i class="${iconClass} text-2xl"></i>
+                <span>${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+
+            // Animate out and remove
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    container.removeChild(toast);
+                }, 500);
+            }, 3000); // Toast visible for 3 seconds
+        }
+
+        // Initialize countdown on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            startCountdown();
+            navigateTo('home'); // Set initial page
+        });
     </script>
 </body>
 </html>
